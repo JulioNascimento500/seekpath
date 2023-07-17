@@ -7,7 +7,7 @@ from . import SupercellWarning
 
 
 def get_explicit_from_implicit(  # pylint: disable=too-many-locals
-    seekpath_output, reference_distance
+    seekpath_output, reference_distance, pathtaken=None
 ):
     """
     Given the output of ``get_path`` by seekpath, compute an "explicit" path,
@@ -28,6 +28,15 @@ def get_explicit_from_implicit(  # pylint: disable=too-many-locals
     kpoints_linearcoord = []
     previous_linearcoord = 0.0
     segments = []
+    
+    if pathtaken is not None:
+        path=[]
+        for i in range(len(pathtaken)-1):
+            path.append((pathtaken[i],pathtaken[i+1]))
+
+        seekpath_output["path"]=path
+    	
+    
     for start_label, stop_label in seekpath_output["path"]:
         start_coord = np.array(seekpath_output["point_coords"][start_label])
         stop_coord = np.array(seekpath_output["point_coords"][stop_label])
@@ -478,6 +487,7 @@ def get_explicit_k_path_orig_cell(
     threshold=1.0e-7,
     symprec=1e-05,
     angle_tolerance=-1.0,
+    pathtaken=None
 ):
     r"""
     Return the kpoint path for band structure (in scaled and absolute
@@ -598,7 +608,7 @@ def get_explicit_k_path_orig_cell(
     res["reciprocal_primitive_lattice"] = get_reciprocal_cell_rows(structure[0])
 
     explicit_res = get_explicit_from_implicit(
-        res, reference_distance=reference_distance
+        res, reference_distance=reference_distance,pathtaken=pathtaken
     )
 
     res.pop("reciprocal_primitive_lattice")
